@@ -2,18 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { animate, motion, useInView, useReducedMotion } from "motion/react";
 
-/** Curva "expo out": arranca rápido y frena suave. Es la que da la sensación premium. */
+/** Curva "expo out": arranca rápido y frena suave. */
 export const EASE = [0.16, 1, 0.3, 1] as const;
 
-/** Aparece al entrar en pantalla: sube, se enfoca y gana opacidad. */
-export function Reveal({ children, delay = 0, y = 40, className = "" }: { children: ReactNode; delay?: number; y?: number; className?: string }) {
+/** Aparece al entrar en pantalla: sube y gana opacidad. */
+export function Reveal({ children, delay = 0, y = 28, className = "" }: { children: ReactNode; delay?: number; y?: number; className?: string }) {
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y, filter: "blur(8px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{ duration: 1, ease: EASE, delay }}
+      initial={{ opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.9, ease: EASE, delay }}
     >
       {children}
     </motion.div>
@@ -32,12 +32,9 @@ export function Words({ text, className = "", delay = 0 }: { text: string; class
       aria-label={text}
     >
       {text.split(" ").map((w, i) => (
-        <span key={i} className="inline-block overflow-hidden pb-[0.12em] align-bottom" aria-hidden="true">
-          <motion.span
-            className="inline-block"
-            variants={{ hidden: { y: "110%" }, show: { y: "0%" } }}
-            transition={{ duration: 0.9, ease: EASE }}
-          >
+        // Margen negativo + relleno: la máscara no corta acentos ni letras con rabito (g, j, y).
+        <span key={i} className="-mb-[0.2em] inline-block overflow-hidden pb-[0.2em] pt-[0.08em] -mt-[0.08em] align-bottom" aria-hidden="true">
+          <motion.span className="inline-block" variants={{ hidden: { y: "115%" }, show: { y: "0%" } }} transition={{ duration: 0.9, ease: EASE }}>
             {w}&nbsp;
           </motion.span>
         </span>
@@ -66,42 +63,17 @@ export function Count({ to, from = 0, decimals = 0, suffix = "", prefix = "" }: 
   );
 }
 
-/** Etiqueta pequeña encima de cada titular: número de capítulo y tema. */
-export function Eyebrow({ n, children, dark = false }: { n: string; children: ReactNode; dark?: boolean }) {
-  return (
-    <Reveal y={16}>
-      <p className={`flex items-center gap-3 text-sm font-bold uppercase tracking-[0.14em] ${dark ? "text-salvia" : "text-verde"}`}>
-        <span className="tabular-nums opacity-60">{n}</span>
-        <span className={`h-px w-8 ${dark ? "bg-salvia/50" : "bg-verde/40"}`} />
-        {children}
-      </p>
-    </Reveal>
-  );
-}
-
 /** Pantalla de la app dentro de un marco de móvil. */
-export function Phone({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
+export function Phone({ src, alt, className = "", eager = false }: { src: string; alt: string; className?: string; eager?: boolean }) {
   return (
-    <div className={`rounded-[2.2rem] bg-texto p-[0.45rem] shadow-[0_40px_80px_-20px_rgba(14,20,13,0.45)] ${className}`}>
-      <img src={src} alt={alt} loading="lazy" className="block h-auto w-full rounded-[1.8rem]" />
+    <div className={`rounded-[2.2rem] bg-texto p-[0.45rem] ${className}`}>
+      <img src={src} alt={alt} loading={eager ? "eager" : "lazy"} className="block h-auto w-full rounded-[1.8rem]" />
     </div>
   );
 }
 
-/** Ventana con barra de título, para presentar cada momento de la demo. */
-export function Window({ title, children, className = "" }: { title: string; children: ReactNode; className?: string }) {
-  return (
-    <div className={`overflow-hidden rounded-3xl bg-white shadow-[0_30px_70px_-25px_rgba(14,20,13,0.35)] ring-1 ring-texto/5 ${className}`}>
-      <div className="flex items-center gap-2 border-b border-texto/5 px-5 py-3">
-        <span className="h-3 w-3 rounded-full bg-salvia-media/70" />
-        <span className="h-3 w-3 rounded-full bg-salvia" />
-        <span className="h-3 w-3 rounded-full bg-salvia" />
-        <span className="ml-3 truncate text-xs font-semibold text-suave">{title}</span>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-export const T_XL = "titular text-[clamp(2.4rem,6.2vw,5.6rem)] font-semibold leading-[1.04]";
-export const T_L = "titular text-[clamp(2rem,4.6vw,4.2rem)] font-semibold leading-[1.06]";
+/** Titular de sección: dos líneas como mucho. */
+export const T_XL = "titular text-[clamp(2.6rem,6.4vw,6rem)] font-semibold leading-[1.02] tracking-[-0.025em]";
+export const T_L = "titular text-[clamp(2.2rem,4.6vw,4.4rem)] font-semibold leading-[1.04] tracking-[-0.02em]";
+/** Frase de apoyo bajo un titular. */
+export const LEAD = "max-w-[38rem] text-xl leading-[1.45] sm:text-2xl";
