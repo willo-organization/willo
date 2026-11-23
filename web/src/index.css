@@ -8,12 +8,30 @@
   --color-verde: #3E5A34;
   --color-texto: #1E2A1B;
   --color-suave: #4A5745;
+  --color-noche: #0E140D;
+  --color-crema: #F4F5EF;
   --font-sans: "Figtree Variable", Helvetica, Arial, sans-serif;
   --font-serif: "Fraunces Variable", Georgia, serif;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 3.5rem; /* la barra superior fija no tapa el titular al saltar a un apartado */
+  overflow-x: clip; /* clip y no hidden: hidden rompe position: sticky */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   @apply bg-fondo text-texto font-sans antialiased;
+}
+
+::selection {
+  @apply bg-verde text-fondo;
 }
 
 /* Fraunces con el eje SOFT al máximo, como en el pitch. */
