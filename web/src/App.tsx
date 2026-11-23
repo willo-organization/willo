@@ -1,70 +1,140 @@
-import { MotionConfig, motion } from "motion/react";
-import ParticleText from "./components/ParticleText";
+import { useEffect, useState } from "react";
+import { MotionConfig, motion, useScroll, useSpring } from "motion/react";
+import {
+  Ana,
+  Cierre,
+  Circulo,
+  Competencia,
+  DEMO_URL,
+  Demo,
+  Equipo,
+  GoToMarket,
+  Hero,
+  Javi,
+  LecturaFacil,
+  Mercado,
+  Momentos,
+  Negocio,
+  Numeros,
+  Problema,
+  Pruebalo,
+  Solucion,
+  Tecnologia,
+} from "./sections";
 
-const DEMO_URL = "https://willo-sfh4.onrender.com/demo/banco";
+/** Apartados del índice lateral (id de la sección y nombre corto). Mismo orden que el pitch. */
+const INDICE = [
+  ["inicio", "Inicio"],
+  ["javi", "Javi"],
+  ["problema", "El problema"],
+  ["solucion", "La solución"],
+  ["mercado", "El mercado"],
+  ["competencia", "Competencia"],
+  ["demo", "Demo"],
+  ["momentos", "Lo que hace"],
+  ["circulo", "Círculo de apoyo"],
+  ["ana", "El móvil de Ana"],
+  ["tecnologia", "Cómo funciona"],
+  ["lectura-facil", "Lectura fácil"],
+  ["negocio", "Negocio"],
+  ["numeros", "Números"],
+  ["go-to-market", "Go to market"],
+  ["equipo", "Equipo"],
+  ["pruebalo", "Pruébalo"],
+  ["cierre", "Cierre"],
+] as const;
 
-const fade = (delay: number) => ({
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: "easeOut", delay },
-}) as const;
-
-const puntos = [
-  { t: "Noa te explica las cuentas", d: "Preguntas hablando. Noa te dice cuánto te queda, en frases cortas. Tú decides." },
-  { t: "Avisa de estafas, sin bloquear", d: "Si un pago parece un engaño, Willo te explica por qué y te propone esperar." },
-  { t: "Tú eliges tus apoyos", d: "Decides quién te acompaña con tu dinero, y lo puedes cambiar cuando quieras." },
-];
+function useActiveSection() {
+  const [active, setActive] = useState("inicio");
+  useEffect(() => {
+    // Activa la sección que cruza la mitad de la pantalla.
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
+      { rootMargin: "-50% 0px -50% 0px" },
+    );
+    INDICE.forEach(([id]) => {
+      const el = document.getElementById(id);
+      if (el) io.observe(el);
+    });
+    return () => io.disconnect();
+  }, []);
+  return active;
+}
 
 export default function App() {
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 24, mass: 0.3 });
+  const active = useActiveSection();
+
   return (
     <MotionConfig reducedMotion="user">
-      {/* Portada: la misma animación de partículas que la portada del pitch. */}
-      <section className="relative h-svh min-h-[560px] overflow-hidden">
-        {/* shortcut: se mide el ancho solo al cargar; en móvil, menos puntos para que no se amontonen. */}
-        <ParticleText
-          renderer="canvas"
-          text="willo"
-          fitWidth={0.8}
-          fitHeight={0.34}
-          centerY={0.4}
-          maxPoints={window.innerWidth < 640 ? 1100 : 3500}
-          dotSize={window.innerWidth < 640 ? 1.4 : 2}
-        />
-        <p className="absolute left-4 top-6 text-sm font-semibold sm:left-12 sm:top-12 sm:text-base">
-          El modo fácil de tu banco, por voz
-        </p>
-        <div className="absolute inset-x-4 top-[62%] flex flex-col items-center gap-4 text-center">
-          <motion.p {...fade(1.6)} className="titular text-3xl italic text-suave sm:text-5xl">
-            Tu voluntad, tu dinero.
-          </motion.p>
-          <motion.p {...fade(2)} className="max-w-xl text-base text-suave sm:text-xl">
-            Para personas con discapacidad intelectual. Su asistente se llama Noa.
-          </motion.p>
-          <motion.a
-            {...fade(2.4)}
+      <a href="#javi" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-verde focus:px-4 focus:py-2 focus:text-fondo">
+        Saltar al contenido
+      </a>
+
+      {/* Barra superior: marca, demo y progreso de lectura. */}
+      <header className="fixed inset-x-0 top-0 z-40 border-b border-texto/5 bg-fondo/70 backdrop-blur-xl">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-5 sm:px-10 lg:px-20">
+          <a href="#inicio" className="titular text-2xl font-semibold text-verde">
+            willo
+          </a>
+          <a
             href={DEMO_URL}
-            className="mt-2 rounded-full bg-verde px-6 py-3 font-semibold text-fondo outline-offset-4 hover:bg-texto"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full bg-verde px-4 py-2 text-sm font-semibold text-fondo transition-colors hover:bg-texto"
           >
             Probar la demo
-          </motion.a>
+          </a>
         </div>
-      </section>
+        <motion.div style={{ scaleX: progress }} className="absolute inset-x-0 bottom-0 h-0.5 origin-left bg-verde" />
+      </header>
 
-      <section className="mx-auto max-w-5xl px-4 py-20 sm:px-12">
-        <h2 className="titular text-3xl sm:text-5xl">Willo explica. Tú decides.</h2>
-        <ul className="mt-10 grid gap-6 sm:grid-cols-3">
-          {puntos.map((p) => (
-            <li key={p.t} className="rounded-2xl bg-salvia/60 p-6">
-              <h3 className="text-lg font-bold">{p.t}</h3>
-              <p className="mt-2 text-suave">{p.d}</p>
-            </li>
-          ))}
+      {/* Índice lateral (escritorio): un punto por apartado; el nombre aparece al pasar el ratón. */}
+      <nav aria-label="Apartados" className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 xl:block">
+        <ul className="flex flex-col items-end gap-2.5">
+          {INDICE.map(([id, label]) => {
+            const on = id === active;
+            return (
+              <li key={id}>
+                <a href={`#${id}`} aria-current={on ? "true" : undefined} className="group flex items-center gap-3">
+                  <span
+                    className={`rounded-full bg-texto/80 px-2.5 py-1 text-xs font-semibold text-fondo transition-opacity duration-300 ${
+                      on ? "opacity-0 group-hover:opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+                    }`}
+                  >
+                    {label}
+                  </span>
+                  <span
+                    className={`block rounded-full ring-2 ring-fondo/80 transition-all duration-500 ${on ? "h-6 w-1.5 bg-verde" : "h-1.5 w-1.5 bg-salvia-media group-hover:bg-verde"}`}
+                  />
+                </a>
+              </li>
+            );
+          })}
         </ul>
-      </section>
+      </nav>
 
-      <footer className="bg-texto px-4 py-10 text-center text-sm text-salvia sm:px-12">
-        Willo · Equipo ChickPEAKS · Demo con datos inventados
-      </footer>
+      <main>
+        <Hero />
+        <Javi />
+        <Problema />
+        <Solucion />
+        <Mercado />
+        <Competencia />
+        <Demo />
+        <Momentos />
+        <Circulo />
+        <Ana />
+        <Tecnologia />
+        <LecturaFacil />
+        <Negocio />
+        <Numeros />
+        <GoToMarket />
+        <Equipo />
+        <Pruebalo />
+        <Cierre />
+      </main>
     </MotionConfig>
   );
 }
