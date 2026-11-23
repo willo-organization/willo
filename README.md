@@ -11,7 +11,7 @@ Willo es una app con asistente de voz en **lectura fácil** para que las persona
 
 > Demo con datos inventados. No se conecta a ningún banco.
 
-## Probar Willo (jurado)
+## Probar Willo
 
 **Sin instalar nada:** https://willo-sfh4.onrender.com. Tiene la voz de Noa y la lectura de fotos con Claude. Si nadie la ha usado en un rato, la primera vez tarda **hasta 1 minuto** en arrancar; después va normal.
 

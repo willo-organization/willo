@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
 <script src="/static/pwa.js" defer></script>
 <script>
-  // La app instalada abre siempre en el banco (MyInvestor). Si alguien la instaló cuando abría en Willo,
+  // La app instalada abre siempre en el banco. Si alguien la instaló cuando abría en Willo,
   // la primera vez de cada apertura se le lleva al banco. Después, desde el botón de Willo, entra normal.
   try {
     if (matchMedia("(display-mode: standalone)").matches && !sessionStorage.getItem("willo_entrada") && !location.hash) {
@@ -1077,7 +1077,7 @@ async function leerDocumento(foto) {
   const r = await fetch(`/api/personas/${P}/documentos/leer`, {method: "POST", body: datos});
   const cuerpo = await r.json().catch(() => ({}));
   if (r.ok) return cuerpo;
-  if (r.status === 503) {  // sin ANTHROPIC_API_KEY (p. ej. el jurado en su ordenador): la demo sigue con la multa de ejemplo
+  if (r.status === 503) {  // sin ANTHROPIC_API_KEY (p. ej. alguien que la prueba en su ordenador): la demo sigue con la multa de ejemplo
     mensajeP5("Modo demo: sin clave de Claude no puedo leer tu foto. Te enseño una multa de ejemplo.");
     await new Promise(ok => setTimeout(ok, 3000));
     return {...DOCUMENTO_DEMO};

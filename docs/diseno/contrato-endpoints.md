@@ -274,5 +274,5 @@ En la API van como número; en pantalla siempre el nombre.
 ## Decidido (Inés, 8 de noviembre de 2026)
 
 1. **Leer documento en dos pasos** (`/documentos/leer` y luego `/documentos/confirmar`). Javi comprueba lo leído antes de que se hagan cuentas, porque la IA puede leer mal una cifra. Pantallas 5, 6 y 7.
-2. **Modelo: Claude Haiku** (con visión), con la clave de la fase 1. Antes, probarlo con 5 fotos reales: factura, ticket, multa, carta del banco y una foto mala. Si falla con las buenas, cambiar a Sonnet (una línea de código).
+2. **Modelo: Claude Haiku** (con visión), con la clave de Anthropic. Antes, probarlo con 5 fotos reales: factura, ticket, multa, carta del banco y una foto mala. Si falla con las buenas, cambiar a Sonnet (una línea de código).
 3. **Guardar el resultado del envío** con `POST /avisos/{aviso_id}/resultado`. Se apunta igual si Javi no lo envía o si lo envía, sin juzgarle. Lo usan la pantalla 11 y el informe para el juzgado.

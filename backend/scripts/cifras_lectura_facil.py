@@ -1,8 +1,8 @@
-"""Cifras de lectura fácil para el pitch: texto original frente a lo que dice Noa.
+"""Cifras de lectura fácil: texto original frente a lo que dice Noa.
 
 Uso, desde la carpeta backend:
-    python -m scripts.cifras_pitch
-    python -m scripts.cifras_pitch "Pega aquí el texto de un papel real"
+    python -m scripts.cifras_lectura_facil
+    python -m scripts.cifras_lectura_facil "Pega aquí el texto de un papel real"
 
 Los textos originales de abajo están escritos por el equipo, al estilo de los papeles
 reales (no son copias de documentos de nadie). Las frases de Noa son las que devuelve la API.

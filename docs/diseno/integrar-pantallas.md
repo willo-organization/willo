@@ -1,14 +1,14 @@
 # Willo · Cómo integrar las pantallas en Claude Code
 
 Todo lo que necesita Claude Code para convertir el diseño de Figma en las pantallas de la app.
-Fecha: 8 de noviembre de 2026. Diseño: fase 0.
+Fecha: 8 de noviembre de 2026.
 
 ---
 
 ## 1. Qué hay que construir
 
 - **Demo (construir sí o sí): pantallas 1 a 11.**
-- **RESERVA (NO construir para la demo): R1 "Documento sospechoso" y R2 "Lucía y su hucha".** Son las dos últimas. Solo se hacen si sobra tiempo al final; si no, se enseñan en el pitch con la imagen de Figma.
+- **RESERVA (NO construir para la demo): R1 "Documento sospechoso" y R2 "Lucía y su hucha".** Son las dos últimas. Solo se hacen si sobra tiempo al final; si no, se enseñan con la imagen de Figma.
 
 Figma: https://www.figma.com/design/ZXcREoHSq2OEq8h1YKHJKQ
 (Las pantallas de reserva están en la página "Reserva" o en la fila de abajo, con nombre "R1" y "R2".)
@@ -172,7 +172,7 @@ Reglas de lectura fácil (obligatorias):
 4. Ana ve lo que Javi ha elegido compartir. Círculo de apoyo con nombres, no números: Solo yo, Ver, Apoyar, Guardar, Representar.
 5. Documentos: confirmar antes de usar los datos y no guardar la foto.
 
-## 9. Pendiente (lo hacemos en la fase 0, no lo inventes)
+## 9. Pendiente (no lo inventes)
 
 - **Datos de ejemplo:** cambiar `backend/data/seed.json` según `docs/diseno/datos-ejemplo.md` (980 € al mes, 210 € para sus cosas).
 - **Endpoint para leer documentos** (pantallas 5-7): todavía no existe. Lo definimos en el contrato de endpoints. Mientras, usa datos falsos fijos (la multa de 90 €).
