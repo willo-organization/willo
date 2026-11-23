@@ -1,0 +1,13 @@
+// Solo para las versiones de prueba de Cloudflare (PRs y ramas): "Previews Base" se ejecuta
+// desde la raíz del repo y no desde web/. Producción usa web/wrangler.jsonc (Root directory = web).
+// shortcut: copia de web/wrangler.jsonc; bórralo si Previews Base acepta Root directory = web.
+{
+  "name": "willo",
+  "compatibility_date": "2026-11-01",
+  "build": { "command": "cd web && npm ci && npm run build" },
+  "assets": {
+    "directory": "./web/dist",
+    "not_found_handling": "single-page-application"
+  },
+  "previews": {}
+}
