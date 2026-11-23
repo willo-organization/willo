@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Misma paleta y tipografía que el pitch (rama pitch-vercel). */
+/* Paleta y tipografía de Willo. */
 @theme {
   --color-fondo: #F5F7F0;
   --color-salvia: #D3DFC8;
@@ -10,6 +10,10 @@
   --color-suave: #4A5745;
   --color-noche: #0E140D;
   --color-crema: #F4F5EF;
+  /* Acentos: miel (los avisos de la app), coral y cielo. */
+  --color-miel: #E9A23B;
+  --color-coral: #E0735A;
+  --color-cielo: #9CC3E0;
   --font-sans: "Figtree Variable", Helvetica, Arial, sans-serif;
   --font-serif: "Fraunces Variable", Georgia, serif;
 }
@@ -34,7 +38,7 @@ body {
   @apply bg-verde text-fondo;
 }
 
-/* Fraunces con el eje SOFT al máximo, como en el pitch. */
+/* Fraunces con el eje SOFT al máximo. */
 @utility titular {
   font-family: var(--font-serif);
   font-optical-sizing: auto;

@@ -1,6 +1,6 @@
 # Willo · Web
 
-Web de Willo (React + Vite + Tailwind + Motion). La portada usa la misma animación de partículas que el pitch (`src/components/ParticleText.tsx`, copiado de la rama `pitch-vercel`).
+Web de Willo (React + Vite + Tailwind + Motion). La portada usa una animación de partículas que forma la palabra «willo» (`src/components/ParticleText.tsx`).
 
 ## Arrancar
 

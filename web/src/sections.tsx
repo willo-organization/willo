@@ -16,6 +16,8 @@ import { Count, EASE, LEAD, Phone, Reveal, T_L, T_XL, Words } from "./components
 export const DEMO_URL = "https://willo-sfh4.onrender.com/demo/banco";
 const VERDE = "#3E5A34";
 const CREMA = "#F5F7F0";
+const NUBE = ["#3E5A34", "#3E5A34", "#3E5A34", "#3E5A34", "#2E4527", "#A3B18F", "#A3B18F", "#E9A23B", "#E0735A", "#9CC3E0"];
+const NUBE_NOCHE = ["#F5F7F0", "#F5F7F0", "#F5F7F0", "#D3DFC8", "#A3B18F", "#E9A23B", "#E0735A", "#9CC3E0"];
 
 type Offset = NonNullable<Parameters<typeof useScroll>[0]>["offset"];
 
@@ -63,7 +65,7 @@ export function Hero() {
       {/* La palabra "willo" hecha de puntos: se dispersa con el ratón y vuelve a su sitio. */}
       <motion.div style={{ scale, opacity: fade }} className="relative min-h-[38vh] flex-1">
         {/* shortcut: el ancho se mide solo al cargar; en móvil, menos puntos para que no se amontonen. */}
-        <ParticleText renderer="canvas" text="willo" active={inView} fitWidth={0.86} fitHeight={0.7} centerY={0.5} maxPoints={small ? 1100 : 3800} dotSize={small ? 1.4 : 2} />
+        <ParticleText renderer="canvas" text="willo" colors={NUBE} active={inView} fitWidth={0.86} fitHeight={0.7} centerY={0.5} gap={2} maxPoints={small ? 2600 : 9500} dotSize={small ? 1.1 : 1.55} />
       </motion.div>
       <Wrap className="grid gap-8 pb-12 pt-4 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:gap-16 lg:pb-16">
         <h1 className="titular text-[clamp(2.8rem,6.6vw,6.2rem)] font-semibold leading-[0.98] tracking-[-0.03em] text-texto">
@@ -148,13 +150,13 @@ function Bar({ label, value, to, strong = false }: { label: string; value: strin
 /* Franja de la ley: la oportunidad. */
 export function Ley() {
   return (
-    <section aria-labelledby="ley-t" className="bg-noche py-20 text-crema lg:py-28">
+    <section aria-labelledby="ley-t" className="bg-miel py-20 text-noche lg:py-28">
       <Wrap className="grid items-end gap-8 lg:grid-cols-[auto_1fr] lg:gap-20">
         <h2 id="ley-t" className="titular text-[clamp(3.4rem,9vw,8.5rem)] font-semibold leading-[0.9] tracking-[-0.03em]">
           <Words text="Junio de 2025." />
         </h2>
         <Reveal>
-          <p className="max-w-xl text-xl leading-[1.45] text-crema sm:text-2xl">
+          <p className="max-w-xl text-xl leading-[1.45] sm:text-2xl">
             Desde entonces, la ley obliga a los bancos a ser accesibles. La banca digital dejaba fuera justo a quien más apoyo necesita. Ahora tiene que contar con ellos.
           </p>
         </Reveal>
@@ -175,10 +177,10 @@ export function TuDecides() {
     <section id="como-funciona" aria-labelledby="como-t">
       <Wrap className="grid gap-10 pb-10 pt-28 lg:grid-cols-2 lg:items-end lg:pt-44">
         <h2 id="como-t" className={T_XL}>
-          <Words text="Noa explica. Tú decides." />
+          <Words text="Noa hace la cuenta." />
         </h2>
         <Reveal>
-          <p className={LEAD}>Javi habla con Noa, su asistente. Noa hace la cuenta, la explica con frases cortas y cifras en euros, y nunca decide por él. Siempre termina igual:</p>
+          <p className={LEAD}>Javi habla con Noa, su asistente. Noa suma, resta y lo explica con frases cortas y cifras en euros. Pero la última palabra nunca es suya. Siempre termina igual:</p>
         </Reveal>
       </Wrap>
       <motion.div ref={ref} style={{ backgroundColor: bg }} className="relative h-[170vh]">
@@ -246,7 +248,7 @@ export function Probar() {
         </div>
 
         {/* La conversación, dibujada como en la app. */}
-        <div data-ui className="mx-auto w-full max-w-xl rounded-[2rem] bg-salvia p-5 sm:p-8">
+        <div data-ui className="mx-auto w-full max-w-xl rounded-[2rem] bg-cielo p-5 sm:p-8">
           <div className="flex items-center justify-between rounded-2xl bg-fondo px-5 py-4">
             <p className="font-bold">Este mes te quedan</p>
             <p className="titular text-3xl font-semibold text-verde">{euros(SALDO)}</p>
@@ -372,8 +374,8 @@ export function Tecnologia() {
   const pasos = [
     { k: "ElevenLabs", t: "Escucha y habla", d: "La voz de Noa, la conversación y el dictado con Scribe.", c: "bg-fondo" },
     { k: "Nuestro backend, en FastAPI", t: "Hace las cuentas", d: null, c: "bg-verde text-crema" },
-    { k: "Claude", t: "Lo dice fácil", d: "Lee multas y facturas y lo escribe en lectura fácil.", c: "bg-fondo" },
-    { k: "Javi", t: "Decide", d: "Willo nunca compra, nunca paga y nunca bloquea.", c: "bg-salvia-media/50" },
+    { k: "Claude", t: "Lo dice fácil", d: "Lee multas y facturas y lo escribe en lectura fácil.", c: "bg-coral text-noche" },
+    { k: "Javi", t: "Decide", d: "Willo nunca compra, nunca paga y nunca bloquea.", c: "bg-miel text-noche" },
   ];
   return (
     <section id="tecnologia" aria-labelledby="tec-t" className="bg-salvia py-28 lg:py-44">
@@ -437,7 +439,7 @@ export function LecturaFacil() {
           </Reveal>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-lg">
             <span className="flex items-center gap-2">
-              <i className="h-3.5 w-3.5 rounded-full bg-salvia-media" /> El papel original
+              <i className="h-3.5 w-3.5 rounded-full bg-coral" /> El papel original
             </span>
             <span className="flex items-center gap-2">
               <i className="h-3.5 w-3.5 rounded-full bg-verde" /> Con Noa
@@ -465,7 +467,7 @@ export function LecturaFacil() {
                   viewport={{ once: true, amount: 0.8 }}
                   transition={{ duration: 1.4, ease: EASE, delay: 0.3 + i * 0.12 }}
                 />
-                <span className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-salvia-media" style={{ left: `${f.a}%` }} />
+                <span className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-coral" style={{ left: `${f.a}%` }} />
                 <motion.span
                   className="absolute top-1/2 -ml-3 -mt-3 h-6 w-6 rounded-full bg-verde ring-4 ring-fondo"
                   style={{ left: `${f.b}%` }}
@@ -651,8 +653,8 @@ export function Numeros() {
     { t: "Alojamiento", d: "Vercel y Render", v: "− 24 €" },
   ];
   const tramos = [
-    { w: 43.6, c: "bg-salvia-media", l: "IA, 44 %" },
-    { w: 3.5, c: "bg-salvia", l: "Resto, 3,5 %" },
+    { w: 43.6, c: "bg-coral", l: "IA, 44 %" },
+    { w: 3.5, c: "bg-miel", l: "Resto, 3,5 %" },
     { w: 52.9, c: "bg-verde", l: "Nos queda, 53 %" },
   ];
   return (
@@ -843,7 +845,7 @@ export function Camino() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.4 }}
               transition={{ duration: 0.9, ease: EASE, delay: i * 0.1 }}
-              className={`flex min-h-[14rem] flex-col justify-end gap-4 rounded-[2rem] p-8 sm:p-10 ${i === 0 ? "bg-verde text-crema" : i === 1 ? "bg-salvia" : "bg-salvia/50"}`}
+              className={`flex min-h-[14rem] flex-col justify-end gap-4 rounded-[2rem] p-8 sm:p-10 ${i === 0 ? "bg-verde text-crema" : i === 1 ? "bg-miel" : "bg-cielo"}`}
             >
               <h3 className="titular text-[clamp(2rem,3.4vw,3.2rem)] font-semibold leading-[1.02]">{s.t}</h3>
               <p className="max-w-2xl text-lg leading-snug">{s.d}</p>
@@ -872,7 +874,7 @@ export function Equipo() {
           <Words text="Somos seis." />
         </h2>
         <Reveal>
-          <p className={LEAD}>El equipo ChickPEAKS. Datos, tecnología, telecomunicación y economía: nos complementamos.</p>
+          <p className={LEAD}>Datos, tecnología, telecomunicación y economía: nos complementamos.</p>
         </Reveal>
       </Wrap>
       <Wrap className="mt-16 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 xl:grid-cols-6">
@@ -885,7 +887,7 @@ export function Equipo() {
             transition={{ duration: 0.9, ease: EASE, delay: i * 0.07 }}
             className={`group ${i % 2 ? "xl:mt-16" : ""}`}
           >
-            <div className="aspect-[4/5] overflow-hidden rounded-[1.6rem] bg-salvia-media">
+            <div className={`aspect-[4/5] overflow-hidden rounded-[1.6rem] ${["bg-miel", "bg-coral", "bg-cielo"][i % 3]}`}>
               <img src={`/equipo/${p.f}.jpg`} alt={`Foto de ${p.n}`} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
             </div>
             <figcaption className="mt-4">
@@ -934,13 +936,11 @@ export function Cierre() {
       </Wrap>
       {/* El nombre vuelve a lo ancho, hecho de puntos. */}
       <div className="relative h-[min(46vw,440px)]" aria-hidden="true">
-        <ParticleText renderer="canvas" text="willo" color={CREMA} active={inView} fitWidth={0.92} fitHeight={0.9} centerY={0.5} maxPoints={small ? 1100 : 3500} dotSize={small ? 1.4 : 2} />
+        <ParticleText renderer="canvas" text="willo" color={CREMA} colors={NUBE_NOCHE} active={inView} fitWidth={0.92} fitHeight={0.9} centerY={0.5} gap={2} maxPoints={small ? 2600 : 9500} dotSize={small ? 1.1 : 1.55} />
       </div>
       <Wrap className="flex flex-col gap-4 pb-10 pt-6 text-base text-salvia sm:flex-row sm:items-center sm:justify-between">
         <p>Willo · Tu voluntad, tu dinero. Demo con datos inventados.</p>
-        <p className="flex flex-wrap items-center gap-2">
-          Gracias a <span className="inline-flex items-center gap-2 rounded-full bg-crema px-3 py-1 font-bold text-[#282828]"><img src="/myinvestor.svg" alt="" className="h-5 w-auto" />MyInvestor</span> por patrocinar el hackathon.
-        </p>
+        <a href="#inicio" className="font-bold text-crema hover:text-salvia">Volver arriba ↑</a>
       </Wrap>
     </footer>
   );

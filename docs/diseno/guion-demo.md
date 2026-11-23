@@ -13,7 +13,7 @@ Personajes: Javi (34, lavandería, 980 €/mes, le quedan 210 € para sus cosas
 2:35-2:50 Informe para el juzgado en un toque; "Mostrar más" en estafas enseña "Dinero no enviado". (pantallas 10 y 11)
 2:50-3:00 Cierre: "Willo: tu voluntad, tu dinero."
 
-Fuera de la demo (para pitch o si sobra tiempo): Lucía y su hucha (pantalla R2), documento sospechoso que pide la clave (pantalla R1).
+Fuera de la demo (si sobra tiempo): Lucía y su hucha (pantalla R2), documento sospechoso que pide la clave (pantalla R1).
 
 Círculo de apoyo (nombres en vez de niveles). Cada uno incluye lo anterior:
 - Solo yo: nadie más ve mi dinero.

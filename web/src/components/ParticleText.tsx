@@ -33,6 +33,8 @@ export type ParticleTextProps = {
   dotScale?: number;
   /** Color de los puntos. Por defecto, el verde de acento de Willo. */
   color?: string;
+  /** Varios colores: cada punto toma uno al nacer (repite un color para que salga más). Solo modo canvas. */
+  colors?: string[];
   /** Rejilla de muestreo en píxeles del canvas de referencia (fuente a 200 px). Sube sola si salen demasiados puntos. */
   gap?: number;
   /** Radio medio de cada punto en px (cada punto varía ±20 %). */
@@ -89,6 +91,8 @@ type Particle = {
   sx: number;
   sy: number;
   rank: number;
+  /** Color propio del punto (si se pasan `colors`). */
+  c?: string;
 };
 
 const SVG_LIMIT = 700;
@@ -234,6 +238,7 @@ export default function ParticleText({
   renderer = "auto",
   dotScale: dotScaleProp = 1,
   color = "#3E5A34",
+  colors,
   gap = 3,
   dotSize = 2,
   duration = 1.6,
@@ -263,6 +268,8 @@ export default function ParticleText({
     if (chorTimer.current) clearTimeout(chorTimer.current);
   }, []);
   const colorMV = useRef(motionValue(color)).current;
+  const colorsRef = useRef(colors);
+  colorsRef.current = colors;
   const scaleMV = useRef(motionValue(dotScaleProp)).current;
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const boxKey = box ? `${box.x},${box.y},${box.w},${box.h}` : "";
@@ -433,6 +440,8 @@ export default function ParticleText({
         // Puntos que faltan: nacen en una posición aleatoria.
         const s = scatterPoint(size.w, size.h);
         p = makeParticle(s.x, s.y, dotSize);
+        const cs = colorsRef.current;
+        if (cs?.length) p.c = cs[Math.floor(Math.random() * cs.length)];
         animate(p.op, p.baseOpacity, { duration: 0.8, delay: firstTime ? rand(0, 0.5) : 0 });
       }
       p.target = t;
@@ -579,6 +588,7 @@ export default function ParticleText({
         const x = p.bx.get() + p.rx.get() + nx;
         const y = p.by.get() + p.ry.get() + ny;
         if (ctx) {
+          if (p.c) ctx.fillStyle = p.c;
           ctx.globalAlpha = p.op.get();
           ctx.beginPath();
           ctx.arc(x, y, p.r * scaleMV.get(), 0, TAU);

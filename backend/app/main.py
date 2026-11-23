@@ -840,7 +840,7 @@ def service_worker():
 
 @app.get("/demo/banco")
 def demo_banco():
-    """Pantalla 0: maqueta de la app de MyInvestor (patrocinador), con Willo dentro."""
+    """Pantalla 0: maqueta de la app de un banco, con Willo dentro."""
     return FileResponse(STATIC / "banco.html", headers=SIN_CACHE)
 
 
@@ -856,5 +856,5 @@ def demo_apoyo():
 
 @app.get("/")
 def raiz():
-    """Quien abre la dirección sin más (p. ej. el jurado) llega a la demo, no a un JSON."""
+    """Quien abre la dirección sin más llega a la demo, no a un JSON."""
     return RedirectResponse("/demo/banco")

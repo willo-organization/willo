@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MyInvestor + Willo · maqueta de la demo</title>
+<title>Tu banco + Willo · maqueta de la demo</title>
 <meta name="theme-color" content="#EAF0FA">
 <link rel="manifest" href="/static/manifest-persona.webmanifest">
 <script src="/static/pwa.js" defer></script>
 <script>try { sessionStorage.setItem("willo_entrada", "1"); } catch (e) {}  /* ya has pasado por el banco */</script>
 <link rel="icon" type="image/png" href="/static/icons/favicon-32.png">
 <style>
-  /* Pantalla 0: maqueta de la app móvil de MyInvestor (patrocinador del hackathon)
+  /* Pantalla 0: maqueta de la app móvil de un banco
      con Willo integrado como «modo fácil». Solo es la superficie: lo único que funciona
      es el botón de Willo y la opción «Activar Willo» en Perfil.
      No es la app real, no tiene inicio de sesión y los datos son los de Javi (inventados). */
@@ -210,7 +210,7 @@
     </div>
     <div class="tarjeta cuenta">
       <div class="fila"><span class="avatar">JA</span></div>
-      <div class="fila"><b>Mi Cuenta MyInvestor</b></div>
+      <div class="fila"><b>Mi cuenta</b></div>
       <div class="fila"><span>Saldo</span><b id="saldo-cuenta">—</b></div>
     </div>
 
@@ -338,12 +338,12 @@ mostrar(location.hash.slice(1));
 // ---------- Activar Willo (se guarda en este móvil) ----------
 // Por defecto está desactivado: en la demo se activa desde Perfil.
 // Con ?willo=1 o ?willo=0 en la dirección se fuerza encendido o apagado (?willo=0 también vuelve a enseñar el aviso).
-const CLAVE = "myinvestor-willo-activado";
+const CLAVE = "banco-willo-activado";
 const leer = () => { try { return localStorage.getItem(CLAVE) === "1"; } catch { return false; } };
 const guardar = on => { try { localStorage.setItem(CLAVE, on ? "1" : "0"); } catch {} };
 const forzar = new URLSearchParams(location.search).get("willo");
 if (forzar === "1" || forzar === "0") guardar(forzar === "1");
-if (forzar === "0") { try { localStorage.removeItem("myinvestor-willo-promo-cerrada"); } catch {} }
+if (forzar === "0") { try { localStorage.removeItem("banco-willo-promo-cerrada"); } catch {} }
 
 function pintarWillo(on) {
   document.getElementById("acceso-willo").hidden = !on;
@@ -352,7 +352,7 @@ function pintarWillo(on) {
   // El aviso de Inicio solo sale si Willo está apagado y nadie lo ha cerrado con la cruz.
   document.getElementById("promo-willo").hidden = on || promoCerrada();
 }
-const CLAVE_PROMO = "myinvestor-willo-promo-cerrada";
+const CLAVE_PROMO = "banco-willo-promo-cerrada";
 const promoCerrada = () => { try { return localStorage.getItem(CLAVE_PROMO) === "1"; } catch { return false; } };
 document.getElementById("promo-cerrar").addEventListener("click", () => {
   try { localStorage.setItem(CLAVE_PROMO, "1"); } catch {}
