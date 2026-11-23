@@ -683,8 +683,8 @@ export function Mercado() {
               <p className="mt-2 text-base text-salvia">Fuentes: European Psychiatry (2020), IMSERSO (2024), Plena inclusión. Asociaciones: hipótesis del equipo, a 2,40 € por usuario.</p>
             </div>
             {/* Ventana que recorta el zoom: los círculos crecen dentro sin tapar el texto. */}
-            <div className="relative order-1 mx-auto grid aspect-square w-[min(80vw,40vh,600px)] place-items-center overflow-hidden rounded-[2.4rem] bg-noche lg:order-2 lg:w-[min(42vw,72vh,620px)]">
-              <motion.div style={{ scale }} className="relative aspect-square w-[88%]">
+            <div className="relative order-1 mx-auto grid aspect-square w-[min(80vw,40vh,600px)] place-items-center overflow-hidden rounded-full bg-noche lg:order-2 lg:w-[min(42vw,72vh,620px)]">
+              <motion.div style={{ scale }} className="relative aspect-square w-full">
                 <Ring size="100%" className="bg-salvia/25 text-crema" label="Europa" active={step === 0} />
                 <Ring size="66%" className="bg-salvia-media/60 text-crema" label="España" active={step === 1} />
                 <Ring size="33%" className="bg-crema text-verde" label="Asociaciones" active={step === 2} center />
