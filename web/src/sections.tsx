@@ -635,7 +635,7 @@ export function Ana() {
           </h2>
           <ul className="flex flex-col gap-6">
             {[
-              { t: "Solo ve lo que Javi comparte", d: "Sus pagos y sus decisiones, si él quiere." },
+              { t: "Solo ve lo que Javi comparte", d: "En la app Willo Apoyo: sus pagos y sus decisiones, si él quiere." },
               { t: "Si Javi pide ayuda, Ana recibe un aviso", d: "Ve a quién quiere pagar, cuánto y por qué parece un engaño." },
               { t: "No puede bloquear pagos", d: "Puede llamar a Javi y hablarlo con él." },
             ].map((it, i) => (
@@ -673,7 +673,7 @@ export function Tecnologia() {
   const line = useTransform(p, [0.1, 0.9], [0, 1]);
   const pasos = [
     { k: "ElevenLabs", t: "Noa escucha y habla", d: "La voz, la conversación y el dictado (Scribe).", c: "bg-white" },
-    { k: "Nuestro código", t: "El código hace la cuenta", d: null, c: "bg-verde text-fondo" },
+    { k: "Nuestro backend · FastAPI", t: "El código hace la cuenta", d: null, c: "bg-verde text-fondo" },
     { k: "Claude", t: "Lo explica en lectura fácil", d: "Y lee las fotos de multas y facturas.", c: "bg-white" },
     { k: "La persona", t: "Javi decide", d: "Willo nunca compra, nunca paga y nunca bloquea.", c: "bg-salvia" },
   ];
@@ -684,6 +684,9 @@ export function Tecnologia() {
         <h2 className={T_XL}>
           <Words text="La IA explica. Las cuentas las hace nuestro código." />
         </h2>
+        <Reveal>
+          <p className="max-w-2xl text-lg text-suave">Las cuentas y las reglas antiestafa van en nuestro código, no en la IA. Es una web app (PWA) en Render: se abre en el móvil sin pasar por la tienda de apps.</p>
+        </Reveal>
       </Wrap>
       <Wrap className="relative mt-14">
         {/* Línea que se dibuja con el scroll y conecta los cuatro pasos. */}
@@ -802,6 +805,9 @@ export function Negocio() {
         <h2 className={T_XL}>
           <Words text="Paga el banco, porque la ley ya le pide ser accesible." />
         </h2>
+        <Reveal>
+          <p className="max-w-2xl text-lg text-suave">El banco ofrece Willo gratis a sus clientes con discapacidad intelectual. La Ley 11/2023 ya le obliga a ser accesible.</p>
+        </Reveal>
       </Wrap>
       <Wrap className="mt-14 grid gap-16 lg:grid-cols-2">
         <div>
