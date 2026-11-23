@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+/* Misma paleta y tipografía que el pitch (rama pitch-vercel). */
+@theme {
+  --color-fondo: #F5F7F0;
+  --color-salvia: #D3DFC8;
+  --color-salvia-media: #A3B18F;
+  --color-verde: #3E5A34;
+  --color-texto: #1E2A1B;
+  --color-suave: #4A5745;
+  --font-sans: "Figtree Variable", Helvetica, Arial, sans-serif;
+  --font-serif: "Fraunces Variable", Georgia, serif;
+}
+
+body {
+  @apply bg-fondo text-texto font-sans antialiased;
+}
+
+/* Fraunces con el eje SOFT al máximo, como en el pitch. */
+@utility titular {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 100, "WONK" 0;
+  letter-spacing: -0.015em;
+}
