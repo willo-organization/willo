@@ -22,6 +22,11 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 3.5rem; /* la barra superior fija no tapa el titular al saltar a un apartado */
   overflow-x: clip; /* clip y no hidden: hidden rompe position: sticky */
+  scrollbar-width: none; /* sin barra de scroll lateral: el progreso se ve en la barra de la cabecera */
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -44,4 +49,48 @@ body {
   font-optical-sizing: auto;
   font-variation-settings: "SOFT" 100, "WONK" 0;
   letter-spacing: -0.015em;
+}
+
+/* Entradas al hacer scroll (Reveal y Words en components/ui.tsx). Solo se esconde algo si hay JavaScript
+   (clase .js, puesta en index.html) y si la persona no ha pedido reducir el movimiento. */
+@media (prefers-reduced-motion: no-preference) {
+  .js div[data-reveal]:not([data-carga]) {
+    opacity: 0;
+    transform: translateY(var(--y, 28px));
+    transition:
+      opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s),
+      transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s);
+  }
+  .js div[data-reveal][data-visto] {
+    opacity: 1;
+    transform: none;
+  }
+  .js span[data-reveal]:not([data-carga]) .palabra {
+    transform: translateY(115%);
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--d, 0s) + var(--i, 0) * 0.06s);
+  }
+  .js span[data-reveal][data-visto] .palabra {
+    transform: none;
+  }
+}
+
+/* La portada entra al cargar, solo con CSS: no espera al JavaScript (mejor LCP). */
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(var(--y, 28px));
+  }
+}
+@keyframes subir {
+  from {
+    transform: translateY(115%);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  div[data-reveal][data-carga] {
+    animation: entrar 0.9s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s) both;
+  }
+  span[data-reveal][data-carga] .palabra {
+    animation: subir 0.9s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--d, 0s) + var(--i, 0) * 0.06s) both;
+  }
 }

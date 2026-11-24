@@ -93,6 +93,9 @@ type Particle = {
   rank: number;
   /** Color propio del punto (si se pasan `colors`). */
   c?: string;
+  /** Solo modo canvas: posición base del fotograma, en números (sin pasar por los MotionValue, que son caros a miles). */
+  px?: number;
+  py?: number;
 };
 
 const SVG_LIMIT = 700;
@@ -259,6 +262,8 @@ export default function ParticleText({
   const particles = useRef<Particle[]>([]);
   const calm = useRef(motionValue(0)).current; // 0 = flotando disperso · 1 = palabra formada
   const progress = useRef(motionValue(0)).current; // progreso único del modo canvas
+  // Modo canvas: una sola aparición para toda la nube (una animación por punto, a cientos, bloqueaba el móvil al cargar).
+  const appear = useRef(motionValue(0)).current;
   const formed = useRef(false);
   const lastShape = useRef<string | null>(null);
   const wantFormed = useRef(false);
@@ -353,11 +358,12 @@ export default function ParticleText({
         order.forEach((p, i) => {
           p.bx.stop(); // por si venía de moverse libre (la separación de la palabra)
           p.by.stop();
-          p.sx = p.bx.get();
-          p.sy = p.by.get();
+          p.sx = p.px ?? p.bx.get();
+          p.sy = p.py ?? p.by.get();
           p.rank = stagger ? clamp((i / Math.max(1, order.length - 1)) * 0.9 + rand(0, 0.1), 0, 1) : 0;
-          animate(p.op, p.baseOpacity, { duration: 0.6 });
+          p.op.set(p.baseOpacity);
         });
+        if (appear.get() < 1) animate(appear, 1, { duration: 0.6 });
         spreadRef.current = spread;
         progress.stop();
         progress.set(0);
@@ -373,7 +379,7 @@ export default function ParticleText({
       }
       animate(calm, 1, { duration: clamp(order.length * per + 0.4, 0.6, 1.5), ease: "easeInOut" });
     },
-    [calm, progress, duration],
+    [calm, progress, duration, appear],
   );
 
   /** Vuelve a dispersar los puntos (al salir de la diapositiva). */
@@ -393,6 +399,8 @@ export default function ParticleText({
       p.by.set(s.y);
       p.sx = s.x;
       p.sy = s.y;
+      p.px = undefined; // la posición del fotograma ya no vale: manda el MotionValue
+      p.py = undefined;
     }
   }, [calm, progress]);
 
@@ -430,7 +438,7 @@ export default function ParticleText({
     }
 
     const alive = particles.current.filter((p) => !p.dying);
-    const pos = (p: Particle): Pt => p.target ?? { x: p.bx.get(), y: p.by.get() };
+    const pos = (p: Particle): Pt => p.target ?? { x: p.px ?? p.bx.get(), y: p.py ?? p.by.get() };
     alive.sort((a, b) => sortXY(pos(a), pos(b)));
     const firstTime = alive.length === 0;
 
@@ -442,18 +450,20 @@ export default function ParticleText({
         p = makeParticle(s.x, s.y, dotSize);
         const cs = colorsRef.current;
         if (cs?.length) p.c = cs[Math.floor(Math.random() * cs.length)];
-        animate(p.op, p.baseOpacity, { duration: 0.8, delay: firstTime ? rand(0, 0.5) : 0 });
+        if (renderer === "canvas") p.op.set(p.baseOpacity);
+        else animate(p.op, p.baseOpacity, { duration: 0.8, delay: firstTime ? rand(0, 0.5) : 0 });
       }
       p.target = t;
       return p;
     });
+    if (renderer === "canvas" && firstTime) animate(appear, 1, { duration: 0.9 });
 
     // Puntos que sobran: se dispersan, se desvanecen y desaparecen.
     const dying = alive.slice(targets.length);
     // Separación: cada punto sale despedido en la dirección opuesta al centro de la palabra.
     const burst = (p: Particle, extra = 0) => {
-      const x = p.bx.get();
-      const y = p.by.get();
+      const x = p.px ?? p.bx.get();
+      const y = p.py ?? p.by.get();
       const ang = Math.atan2(y - prevCenter.y, x - prevCenter.x) + rand(-0.5, 0.5);
       const d = rand(140, 420) + extra;
       const t = { duration: 0.75, ease: [0.16, 1, 0.3, 1] as [number, number, number, number], delay: rand(0, 0.12) };
@@ -486,6 +496,7 @@ export default function ParticleText({
 
     if (reduced) {
       // Movimiento reducido: la palabra aparece ya formada, sin viajes ni ruido.
+      appear.set(1);
       formed.current = true;
       calm.set(1);
       progress.set(1);
@@ -557,18 +568,28 @@ export default function ParticleText({
       const pr = progress.get();
       const spread = spreadRef.current;
       const ctx = isCanvas ? canvasRef.current?.getContext("2d") : null;
+      // En canvas los puntos se pintan en tandas (mismo color y opacidad parecida): un fill por tanda, no por punto.
+      const tandas = ctx ? new Map<string, number[]>() : null;
+      const base = ctx ? (colorMV.get() as string) : "";
+      const ap = appear.get();
       if (ctx) {
         const { w, h } = sizeRef.current;
         ctx.clearRect(0, 0, w, h);
-        ctx.fillStyle = colorMV.get();
       }
       for (const p of particles.current) {
+        let bx: number;
+        let by: number;
         if (isCanvas && formed.current && p.target && !p.dying) {
           // Cada punto arranca un poco más tarde según su distancia al centro (rank) y llega a 1 a la vez.
           const local = clamp((Math.min(pr, 1) - p.rank * spread) / (1 - spread), 0, 1) + Math.max(0, pr - 1);
-          p.bx.set(p.sx + (p.target.x - p.sx) * local);
-          p.by.set(p.sy + (p.target.y - p.sy) * local);
+          bx = p.sx + (p.target.x - p.sx) * local;
+          by = p.sy + (p.target.y - p.sy) * local;
+        } else {
+          bx = p.bx.get();
+          by = p.by.get();
         }
+        p.px = bx;
+        p.py = by;
         let nx = 0;
         let ny = 0;
         if (!reduced) {
@@ -585,25 +606,45 @@ export default function ParticleText({
             ny += k * amp * Math.cos(t * p.fb * 0.9 + p.ph[2]);
           }
         }
-        const x = p.bx.get() + p.rx.get() + nx;
-        const y = p.by.get() + p.ry.get() + ny;
-        if (ctx) {
-          if (p.c) ctx.fillStyle = p.c;
-          ctx.globalAlpha = p.op.get();
-          ctx.beginPath();
-          ctx.arc(x, y, p.r * scaleMV.get(), 0, TAU);
-          ctx.fill();
+        const x = bx + p.rx.get() + nx;
+        const y = by + p.ry.get() + ny;
+        if (tandas) {
+          const a = Math.round(p.op.get() * ap * 10) / 10; // 11 niveles de opacidad bastan a la vista
+          if (a > 0) {
+            const k = (p.c ?? base) + "|" + a;
+            let t = tandas.get(k);
+            if (!t) tandas.set(k, (t = []));
+            t.push(x, y, p.r);
+          }
         } else {
           p.cx.set(x);
           p.cy.set(y);
         }
       }
-      if (ctx) ctx.globalAlpha = 1;
+      if (ctx && tandas) {
+        const sc = scaleMV.get();
+        for (const [k, t] of tandas) {
+          const i = k.lastIndexOf("|");
+          ctx.fillStyle = k.slice(0, i);
+          ctx.globalAlpha = Number(k.slice(i + 1));
+          ctx.beginPath();
+          for (let j = 0; j < t.length; j += 3) {
+            const r = t[j + 2] * sc;
+            ctx.moveTo(t[j] + r, t[j + 1]);
+            ctx.arc(t[j], t[j + 1], r, 0, TAU);
+          }
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [calm, progress, colorMV, scaleMV, reduced, active]);
+    return () => {
+      cancelAnimationFrame(raf);
+      if (modeRef.current === "canvas") for (const p of particles.current) if (p.px !== undefined) (p.bx.set(p.px), p.by.set(p.py!));
+    };
+  }, [calm, progress, colorMV, scaleMV, reduced, active, appear]);
 
   // Interacción: los puntos a menos de 80 px del ratón se apartan y vuelven con un spring.
   const release = (p: Particle) => {
@@ -623,8 +664,8 @@ export default function ParticleText({
     const my = ((e.clientY - rect.top) * h) / rect.height;
     for (const p of particles.current) {
       if (p.dying) continue;
-      const dx = p.bx.get() - mx;
-      const dy = p.by.get() - my;
+      const dx = (p.px ?? p.bx.get()) - mx;
+      const dy = (p.py ?? p.by.get()) - my;
       const d = Math.hypot(dx, dy);
       if (d < REPEL_RADIUS) {
         const f = 1 - d / REPEL_RADIUS;

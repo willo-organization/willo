@@ -57,23 +57,25 @@ export function Hero() {
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { amount: 0.25 });
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
-  const fade = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-  const small = typeof window !== "undefined" && window.innerWidth < 640;
+  // Por una función, como en useProgress: si no, Motion crea un ViewTimeline nativo, que es caro al cargar.
+  const p = useTransform(scrollYProgress, (v) => v);
+  const scale = useTransform(p, [0, 1], [1, 0.9]);
+  const fade = useTransform(p, [0, 0.7], [1, 0]);
+  const small = typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches;
 
   return (
     <section ref={ref} id="inicio" className="relative flex min-h-svh flex-col pt-16">
       {/* La palabra "willo" hecha de puntos: se dispersa con el ratón y vuelve a su sitio. */}
       <motion.div style={{ scale, opacity: fade }} className="relative min-h-[30vh] flex-1">
         {/* shortcut: el ancho se mide solo al cargar; en móvil, menos puntos para que no se amontonen. */}
-        <ParticleText renderer="canvas" text="willo" colors={NUBE} active={inView} fitWidth={0.8} fitHeight={0.62} centerY={0.5} gap={small ? 4 : 3} maxPoints={small ? 900 : 5200} dotSize={small ? 1.6 : 1.8} />
+        <ParticleText renderer="canvas" text="willo" colors={NUBE} active={inView} fitWidth={small ? 0.92 : 0.8} fitHeight={0.62} centerY={0.5} gap={small ? 4 : 3} maxPoints={small ? 900 : 5200} dotSize={small ? 1.6 : 1.8} />
       </motion.div>
       <Wrap className="relative z-10 grid gap-8 pb-12 lg:-mt-[6vh] lg:grid-cols-[1.25fr_0.75fr] lg:items-end lg:gap-14 lg:pb-16">
         <h1 className="titular text-[clamp(3.2rem,8.4vw,8.6rem)] font-semibold leading-[0.92] tracking-[-0.035em] text-texto">
           <span className="sr-only">Willo: </span>
-          <Words text="Tu voluntad, tu dinero." delay={0.9} />
+          <Words text="Tu voluntad, tu dinero." delay={0.15} carga />
         </h1>
-        <Reveal delay={1.3} y={16} className="flex flex-col gap-7">
+        <Reveal delay={0.35} y={16} className="flex flex-col gap-7" carga>
           <p className="max-w-xl text-xl leading-[1.45]">
             Willo es el modo fácil de tu banco: una app de dinero que se usa hablando y en lectura fácil, para personas con discapacidad intelectual.
           </p>
@@ -394,6 +396,8 @@ export function Momentos() {
                     src={d.src}
                     alt={i === step ? d.alt : ""}
                     aria-hidden={i !== step}
+                    width={780}
+                    height={1688}
                     loading="lazy"
                     initial={false}
                     animate={{ opacity: i === step ? 1 : 0, scale: i === step ? 1 : 1.04 }}
@@ -437,7 +441,7 @@ export function Tecnologia() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.8, ease: EASE, delay: i * 0.09 }}
-              className={`flex min-h-[17rem] flex-col justify-between gap-6 rounded-[2rem] p-8 ${s.c}`}
+              className={`flex flex-col justify-between gap-6 rounded-[2rem] p-7 sm:min-h-[17rem] sm:p-8 ${s.c}`}
             >
               <h3 className="titular text-[2.4rem] font-semibold leading-none">{s.t}</h3>
               <div>
@@ -672,8 +676,16 @@ export function Mercado() {
               <h2 id="mercado-t" className="titular text-[clamp(2rem,3vw,2.8rem)] font-semibold leading-[1.05]">
                 A quién llegamos
               </h2>
+              {/* Las tres cifras, para lectores de pantalla y buscadores (la animación enseña una cada vez). */}
+              <ul className="sr-only">
+                {MERCADO.map((x) => (
+                  <li key={x.k}>
+                    {x.k}: {x.n} {x.d} {x.e}.
+                  </li>
+                ))}
+              </ul>
               <AnimatePresence mode="wait">
-                <motion.div key={r.k} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.45, ease: EASE }} className="flex flex-col gap-3">
+                <motion.div aria-hidden="true" key={r.k} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.45, ease: EASE }} className="flex flex-col gap-3">
                   <p className="text-xl font-bold text-salvia">{r.k}</p>
                   <p className="titular text-[clamp(3.4rem,7.5vw,7rem)] font-semibold leading-[0.9] tracking-[-0.03em]">{r.n}</p>
                   <p className="max-w-lg text-xl leading-snug">{r.d}</p>
@@ -683,10 +695,10 @@ export function Mercado() {
               <p className="mt-2 text-base text-salvia">Fuentes: European Psychiatry (2020), IMSERSO (2024), Plena inclusión. Asociaciones: hipótesis del equipo, a 2,40 € por usuario.</p>
             </div>
             {/* Ventana que recorta el zoom: los círculos crecen dentro sin tapar el texto. */}
-            <div className="relative order-1 mx-auto grid aspect-square w-[min(80vw,40vh,600px)] place-items-center overflow-hidden rounded-full bg-noche [clip-path:circle(50%)] lg:order-2 lg:w-[min(42vw,72vh,620px)]">
+            <div aria-hidden="true" className="relative order-1 mx-auto grid aspect-square w-[min(80vw,40vh,600px)] place-items-center overflow-hidden rounded-full bg-noche [clip-path:circle(50%)] lg:order-2 lg:w-[min(42vw,72vh,620px)]">
               <motion.div style={{ scale }} className="relative aspect-square w-full">
                 <Ring size="100%" className="bg-salvia/25 text-crema" label="Europa" active={step === 0} />
-                <Ring size="66%" className="bg-salvia-media/60 text-crema" label="España" active={step === 1} />
+                <Ring size="66%" className="bg-salvia-media/40 text-crema" label="España" active={step === 1} />
                 <Ring size="33%" className="bg-crema text-verde" label="Asociaciones" active={step === 2} center />
               </motion.div>
             </div>
@@ -703,7 +715,7 @@ function Ring({ size, className, label, active, center = false }: { size: string
       className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 justify-center rounded-full ${center ? "items-center" : "items-start pt-[5%]"} ${className}`}
       style={{ width: size, height: size }}
     >
-      <span className={`text-[clamp(0.85rem,1.9vmin,1.1rem)] font-bold transition-opacity duration-500 ${active ? "opacity-100" : "opacity-50"}`}>{label}</span>
+      <span className={`text-[clamp(0.95rem,2vmin,1.15rem)] transition-[font-weight] duration-500 ${active ? "font-extrabold" : "font-medium"}`}>{label}</span>
     </div>
   );
 }
@@ -840,12 +852,13 @@ export function Competencia() {
       </Wrap>
       <Wrap className="mt-14">
         <Reveal>
+          <p className="mb-3 text-base text-suave sm:hidden">Desliza la tabla para ver todas →</p>
           <div className="-mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0">
-            <table className="w-full min-w-[760px] border-separate border-spacing-0 text-left">
+            <table className="w-full min-w-[680px] border-separate border-spacing-0 text-left sm:min-w-[760px]">
               <caption className="sr-only">Comparativa de Willo con otras soluciones</caption>
               <thead>
                 <tr>
-                  <th className="w-[30%]" />
+                  <th className="sticky left-0 z-10 w-[30%] bg-[#E4EBDC] sm:static sm:bg-transparent" />
                   {COLS.map((c, i) => (
                     <th key={c.n} scope="col" className={`px-2 pb-4 pt-5 text-center align-bottom ${i === 4 ? "rounded-t-3xl bg-verde text-crema" : ""}`}>
                       <span className="block text-lg font-bold">{c.n}</span>
@@ -857,7 +870,7 @@ export function Competencia() {
               <tbody>
                 {FILAS.map((f, r) => (
                   <motion.tr key={f.t} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.6 }} transition={{ duration: 0.7, ease: EASE, delay: r * 0.07 }}>
-                    <th scope="row" className={`rounded-l-2xl px-5 py-4 text-lg font-bold ${r % 2 ? "" : "bg-fondo"}`}>
+                    <th scope="row" className={`sticky left-0 z-10 rounded-l-2xl px-4 py-4 text-base font-bold sm:static sm:px-5 sm:text-lg ${r % 2 ? "bg-[#E4EBDC] sm:bg-transparent" : "bg-fondo"}`}>
                       {f.t}
                     </th>
                     {f.v.map((v, j) => (
@@ -905,11 +918,11 @@ export function Camino() {
           {pasos.map((s, i) => (
             <motion.li
               key={s.t}
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.9, ease: EASE, delay: i * 0.1 }}
-              className={`flex min-h-[14rem] flex-col justify-end gap-4 rounded-[2rem] p-8 sm:p-10 ${i === 0 ? "bg-verde text-crema" : i === 1 ? "bg-salvia" : "bg-salvia/50"}`}
+              className={`flex flex-col justify-end gap-4 rounded-[2rem] p-8 sm:min-h-[14rem] sm:p-10 ${i === 0 ? "bg-verde text-crema" : i === 1 ? "bg-salvia" : "bg-salvia/50"}`}
             >
               <h3 className="titular text-[clamp(2rem,3.4vw,3.2rem)] font-semibold leading-[1.02]">{s.t}</h3>
               <p className="max-w-2xl text-lg leading-snug">{s.d}</p>
@@ -944,7 +957,7 @@ export function Equipo() {
             className={`group ${i % 2 ? "xl:mt-16" : ""}`}
           >
             <div className="aspect-[4/5] overflow-hidden rounded-[1.6rem] bg-salvia-media">
-              <img src={`/equipo/${p.f}.jpg`} alt={`Foto de ${p.n}`} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+              <img src={`/equipo/${p.f}.jpg`} alt={`Foto de ${p.n}`} width={512} height={512} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
             </div>
             <figcaption className="mt-4">
               <span className="block text-2xl font-bold">{p.n}</span>
@@ -969,7 +982,7 @@ export function Equipo() {
 export function Cierre() {
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { amount: 0.2 });
-  const small = typeof window !== "undefined" && window.innerWidth < 640;
+  const small = typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches;
   return (
     <footer ref={ref} id="pruebalo" className="relative overflow-hidden bg-noche text-crema">
       <Wrap className="grid items-center gap-14 pb-10 pt-28 lg:grid-cols-[1.2fr_0.8fr] lg:pt-40">
