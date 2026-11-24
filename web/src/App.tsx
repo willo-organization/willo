@@ -19,6 +19,7 @@ import {
   Tecnologia,
   TuDecides,
 } from "./sections";
+import { useRevelar } from "./components/ui";
 
 /** Enlaces de la cabecera y las secciones que cubre cada uno (para marcar dónde estás). */
 const NAV = [
@@ -39,18 +40,14 @@ function useActiveSection() {
   return active;
 }
 
-export default function App() {
+/** Cabecera aparte: su estado (apartado activo, menú) no vuelve a pintar toda la página. */
+function Cabecera() {
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 24, mass: 0.3 });
   const active = useActiveSection();
   const [menu, setMenu] = useState(false);
 
   return (
-    <MotionConfig reducedMotion="user">
-      <a href="#para-quien" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-verde focus:px-4 focus:py-2 focus:text-crema">
-        Saltar al contenido
-      </a>
-
       <header className="fixed inset-x-0 top-0 z-40 bg-fondo/95">
         <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-6 px-5 sm:px-10 lg:px-16">
           <a href="#inicio" aria-label="Willo, ir al inicio" className="titular text-3xl font-semibold tracking-[-0.03em] text-verde">
@@ -115,6 +112,17 @@ export default function App() {
         </AnimatePresence>
         <motion.div style={{ scaleX: progress }} className="absolute inset-x-0 bottom-0 h-[3px] origin-left bg-verde" />
       </header>
+  );
+}
+
+export default function App() {
+  useRevelar();
+  return (
+    <MotionConfig reducedMotion="user">
+      <a href="#para-quien" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-verde focus:px-4 focus:py-2 focus:text-crema">
+        Saltar al contenido
+      </a>
+      <Cabecera />
 
       <main>
         <Hero />
