@@ -3,10 +3,67 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Willo es el modo fácil de tu banco: una app de dinero que se usa hablando y en lectura fácil, para personas con discapacidad intelectual. Noa explica, la persona decide." />
+    <!-- Dirección pública de la web: si se cambia de dominio, cambiarla aquí, en public/robots.txt y en public/sitemap.xml. -->
+    <title>Willo · App de dinero por voz y en lectura fácil</title>
+    <meta name="description" content="Willo es el modo fácil de tu banco: una app de dinero que se usa hablando y en lectura fácil, para personas con discapacidad intelectual. Noa hace las cuentas y explica; la persona decide." />
+    <meta name="keywords" content="Willo, lectura fácil, discapacidad intelectual, banca accesible, app de dinero, asistente por voz, Noa, accesibilidad financiera" />
+    <link rel="canonical" href="https://willo.willo-admin.workers.dev/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#F5F7F0" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <title>Willo · Tu voluntad, tu dinero</title>
+    <link rel="apple-touch-icon" href="/favicon.png" />
+
+    <!-- Al compartir el enlace (WhatsApp, LinkedIn, X…) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:site_name" content="Willo" />
+    <meta property="og:title" content="Willo · Tu voluntad, tu dinero" />
+    <meta property="og:description" content="El modo fácil de tu banco: una app de dinero que se usa hablando y en lectura fácil, para personas con discapacidad intelectual." />
+    <meta property="og:url" content="https://willo.willo-admin.workers.dev/" />
+    <meta property="og:image" content="https://willo.willo-admin.workers.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Willo. Tu voluntad, tu dinero. El modo fácil de tu banco, por voz y en lectura fácil." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Willo · Tu voluntad, tu dinero" />
+    <meta name="twitter:description" content="El modo fácil de tu banco: una app de dinero que se usa hablando y en lectura fácil." />
+    <meta name="twitter:image" content="https://willo.willo-admin.workers.dev/og.png" />
+
+    <!-- Datos estructurados para buscadores -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://willo.willo-admin.workers.dev/#org",
+            "name": "Willo",
+            "url": "https://willo.willo-admin.workers.dev/",
+            "logo": "https://willo.willo-admin.workers.dev/favicon.png",
+            "slogan": "Tu voluntad, tu dinero."
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://willo.willo-admin.workers.dev/#web",
+            "name": "Willo",
+            "url": "https://willo.willo-admin.workers.dev/",
+            "inLanguage": "es",
+            "publisher": { "@id": "https://willo.willo-admin.workers.dev/#org" }
+          },
+          {
+            "@type": "WebApplication",
+            "name": "Willo",
+            "url": "https://willo-sfh4.onrender.com/demo/banco",
+            "applicationCategory": "FinanceApplication",
+            "operatingSystem": "Web, Android, iOS",
+            "inLanguage": "es",
+            "description": "App de dinero que se usa hablando y en lectura fácil, para personas con discapacidad intelectual. La asistente Noa hace las cuentas y las explica; la persona decide.",
+            "accessibilityFeature": ["easyToRead"],
+            "publisher": { "@id": "https://willo.willo-admin.workers.dev/#org" }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

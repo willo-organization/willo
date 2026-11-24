@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://willo.willo-admin.workers.dev/sitemap.xml

@@ -66,7 +66,7 @@ export function Hero() {
       {/* La palabra "willo" hecha de puntos: se dispersa con el ratón y vuelve a su sitio. */}
       <motion.div style={{ scale, opacity: fade }} className="relative min-h-[30vh] flex-1">
         {/* shortcut: el ancho se mide solo al cargar; en móvil, menos puntos para que no se amontonen. */}
-        <ParticleText renderer="canvas" text="willo" colors={NUBE} active={inView} fitWidth={0.8} fitHeight={0.62} centerY={0.5} gap={small ? 4 : 3} maxPoints={small ? 900 : 5200} dotSize={small ? 1.6 : 1.8} />
+        <ParticleText renderer="canvas" text="willo" colors={NUBE} active={inView} fitWidth={small ? 0.92 : 0.8} fitHeight={0.62} centerY={0.5} gap={small ? 4 : 3} maxPoints={small ? 900 : 5200} dotSize={small ? 1.6 : 1.8} />
       </motion.div>
       <Wrap className="relative z-10 grid gap-8 pb-12 lg:-mt-[6vh] lg:grid-cols-[1.25fr_0.75fr] lg:items-end lg:gap-14 lg:pb-16">
         <h1 className="titular text-[clamp(3.2rem,8.4vw,8.6rem)] font-semibold leading-[0.92] tracking-[-0.035em] text-texto">
@@ -437,7 +437,7 @@ export function Tecnologia() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.8, ease: EASE, delay: i * 0.09 }}
-              className={`flex min-h-[17rem] flex-col justify-between gap-6 rounded-[2rem] p-8 ${s.c}`}
+              className={`flex flex-col justify-between gap-6 rounded-[2rem] p-7 sm:min-h-[17rem] sm:p-8 ${s.c}`}
             >
               <h3 className="titular text-[2.4rem] font-semibold leading-none">{s.t}</h3>
               <div>
@@ -672,8 +672,16 @@ export function Mercado() {
               <h2 id="mercado-t" className="titular text-[clamp(2rem,3vw,2.8rem)] font-semibold leading-[1.05]">
                 A quién llegamos
               </h2>
+              {/* Las tres cifras, para lectores de pantalla y buscadores (la animación enseña una cada vez). */}
+              <ul className="sr-only">
+                {MERCADO.map((x) => (
+                  <li key={x.k}>
+                    {x.k}: {x.n} {x.d} {x.e}.
+                  </li>
+                ))}
+              </ul>
               <AnimatePresence mode="wait">
-                <motion.div key={r.k} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.45, ease: EASE }} className="flex flex-col gap-3">
+                <motion.div aria-hidden="true" key={r.k} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.45, ease: EASE }} className="flex flex-col gap-3">
                   <p className="text-xl font-bold text-salvia">{r.k}</p>
                   <p className="titular text-[clamp(3.4rem,7.5vw,7rem)] font-semibold leading-[0.9] tracking-[-0.03em]">{r.n}</p>
                   <p className="max-w-lg text-xl leading-snug">{r.d}</p>
@@ -840,12 +848,13 @@ export function Competencia() {
       </Wrap>
       <Wrap className="mt-14">
         <Reveal>
+          <p className="mb-3 text-base text-suave sm:hidden">Desliza la tabla para ver todas →</p>
           <div className="-mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0">
-            <table className="w-full min-w-[760px] border-separate border-spacing-0 text-left">
+            <table className="w-full min-w-[680px] border-separate border-spacing-0 text-left sm:min-w-[760px]">
               <caption className="sr-only">Comparativa de Willo con otras soluciones</caption>
               <thead>
                 <tr>
-                  <th className="w-[30%]" />
+                  <th className="sticky left-0 z-10 w-[30%] bg-[#E4EBDC] sm:static sm:bg-transparent" />
                   {COLS.map((c, i) => (
                     <th key={c.n} scope="col" className={`px-2 pb-4 pt-5 text-center align-bottom ${i === 4 ? "rounded-t-3xl bg-verde text-crema" : ""}`}>
                       <span className="block text-lg font-bold">{c.n}</span>
@@ -857,7 +866,7 @@ export function Competencia() {
               <tbody>
                 {FILAS.map((f, r) => (
                   <motion.tr key={f.t} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.6 }} transition={{ duration: 0.7, ease: EASE, delay: r * 0.07 }}>
-                    <th scope="row" className={`rounded-l-2xl px-5 py-4 text-lg font-bold ${r % 2 ? "" : "bg-fondo"}`}>
+                    <th scope="row" className={`sticky left-0 z-10 rounded-l-2xl px-4 py-4 text-base font-bold sm:static sm:px-5 sm:text-lg ${r % 2 ? "bg-[#E4EBDC] sm:bg-transparent" : "bg-fondo"}`}>
                       {f.t}
                     </th>
                     {f.v.map((v, j) => (
@@ -905,11 +914,11 @@ export function Camino() {
           {pasos.map((s, i) => (
             <motion.li
               key={s.t}
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.9, ease: EASE, delay: i * 0.1 }}
-              className={`flex min-h-[14rem] flex-col justify-end gap-4 rounded-[2rem] p-8 sm:p-10 ${i === 0 ? "bg-verde text-crema" : i === 1 ? "bg-salvia" : "bg-salvia/50"}`}
+              className={`flex flex-col justify-end gap-4 rounded-[2rem] p-8 sm:min-h-[14rem] sm:p-10 ${i === 0 ? "bg-verde text-crema" : i === 1 ? "bg-salvia" : "bg-salvia/50"}`}
             >
               <h3 className="titular text-[clamp(2rem,3.4vw,3.2rem)] font-semibold leading-[1.02]">{s.t}</h3>
               <p className="max-w-2xl text-lg leading-snug">{s.d}</p>

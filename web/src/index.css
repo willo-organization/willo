@@ -22,6 +22,11 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 3.5rem; /* la barra superior fija no tapa el titular al saltar a un apartado */
   overflow-x: clip; /* clip y no hidden: hidden rompe position: sticky */
+  scrollbar-width: none; /* sin barra de scroll lateral: el progreso se ve en la barra de la cabecera */
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
