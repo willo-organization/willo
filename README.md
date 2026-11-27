@@ -89,6 +89,25 @@ cd backend && python -m pytest -q
 3. Añadir las 4 herramientas webhook de [`agent/tools.json`](agent/tools.json), con la URL pública del backend (en local, con un túnel como ngrok).
 4. Poner `ELEVENLABS_API_KEY` y `ELEVENLABS_AGENT_ID` en `.env`. El navegador pide una URL firmada a `/api/voz/signed-url`, así la clave nunca sale del servidor.
 
+## Noa de pruebas (gratis, solo para el equipo)
+
+Para desarrollar sin gastar créditos de ElevenLabs. **No quita nada de ElevenLabs**: por defecto Willo sigue usando a Noa de verdad.
+
+| | ElevenLabs (por defecto) | Pruebas gratis |
+|---|---|---|
+| Oye a Javi | Agente de ElevenLabs | El navegador (Chrome o Safari) |
+| Piensa | El modelo que tiene el agente en el panel de ElevenLabs | Gemini, con el **mismo prompt** (`agent/noa_prompt.md`) y las **mismas herramientas** (`agent/tools.json`) |
+| Habla | La voz de Noa | La voz del navegador (suena a robot) |
+| Gasta | Créditos de ElevenLabs | Nada de ElevenLabs. Gemini, del plan gratis |
+
+Cómo usarlo:
+
+1. Pon `GEMINI_API_KEY` en `.env` (clave gratis en https://aistudio.google.com/apikey).
+2. Abre `/demo?dev=1` → engranaje (Ajustes) → **Motor de Noa** → **Pruebas gratis**. También vale `/demo?voz=pruebas`.
+3. Arriba a la izquierda sale la etiqueta amarilla **Voz de pruebas**. Antes de enseñar Willo a un banco, vuelve a **ElevenLabs** (o abre `/demo?voz=elevenlabs`).
+
+Se guarda en cada navegador. Con la voz de pruebas, las pantallas que leen en voz alta también usan la del navegador. El código está en `backend/app/noa_pruebas.py` y en `ConversacionDePruebas` (`persona.html`). Si cambiáis el prompt o las herramientas en ElevenLabs, cambiadlos también en `agent/` para que las pruebas sigan siendo iguales.
+
 ## Productos de ElevenLabs que usamos
 
 | Producto | Para qué |

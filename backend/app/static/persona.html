@@ -24,6 +24,10 @@
 </head>
 <body>
 
+<!-- Solo para el equipo: se ve cuando Noa va con la voz de pruebas (navegador + Gemini), nunca con ElevenLabs -->
+<p id="aviso-pruebas" role="status" hidden
+   style="position:fixed;top:8px;left:8px;z-index:50;margin:0;padding:4px 12px;border-radius:999px;background:#F2C94C;color:#1F2A1C;font-size:14px;font-weight:600">Voz de pruebas</p>
+
 <!-- 1 · Inicio de Javi -->
 <section class="pantalla" data-pantalla="1">
   <header class="cabecera">
@@ -360,6 +364,18 @@
     <button class="boton" type="button" id="p14-probar">Probar la voz</button>
   </div>
 
+  <!-- Solo para el equipo (se ve con ?dev=1): ElevenLabs o la voz de pruebas gratis -->
+  <div id="p14-motor" hidden>
+    <h2 class="titulo-seccion">Motor de Noa (solo equipo)</h2>
+    <div class="tarjeta">
+      <div class="opciones" role="group" aria-label="Motor de Noa">
+        <button class="boton secundario" type="button" data-motor="elevenlabs" aria-pressed="false">ElevenLabs (gasta créditos)</button>
+        <button class="boton secundario" type="button" data-motor="pruebas" aria-pressed="false">Pruebas gratis (navegador + Gemini)</button>
+      </div>
+      <p class="suave" id="p14-motor-nota" style="margin-top:20px"></p>
+    </div>
+  </div>
+
   <h2 class="titulo-seccion">Mi banco</h2>
   <div class="botones">
     <a class="boton secundario" href="/demo/banco" id="p14-banco">Volver al banco</a>
@@ -602,6 +618,194 @@ function prepararMeter(tarjeta, meta, tienes) {
   };
 }
 
+// ---------- Motor de Noa: ElevenLabs (el de verdad) o de pruebas (gratis) ----------
+// ElevenLabs es Noa de verdad: oye, piensa y habla, y gasta créditos. El de pruebas es solo para el
+// equipo: oye y habla el navegador (gratis) y piensa Gemini (plan gratis) con el mismo prompt y las
+// mismas herramientas (backend/app/noa_pruebas.py). Por defecto, ElevenLabs.
+// Se elige en Ajustes, que solo enseña la opción con ?dev=1 en la dirección (?dev=0 la esconde).
+// También vale ?voz=pruebas o ?voz=elevenlabs. Se guarda en este navegador.
+(() => {
+  try {
+    const q = new URLSearchParams(location.search);
+    if (q.get("dev") === "1") localStorage.setItem("willo_dev", "1");
+    if (q.get("dev") === "0") localStorage.removeItem("willo_dev");
+    if (["pruebas", "elevenlabs"].includes(q.get("voz"))) localStorage.setItem("willo_motor_voz", q.get("voz"));
+  } catch { /* sin almacenamiento: siempre ElevenLabs */ }
+})();
+function motorVoz() {
+  try { return localStorage.getItem("willo_motor_voz") === "pruebas" ? "pruebas" : "elevenlabs"; }
+  catch { return "elevenlabs"; }
+}
+function ponerMotorVoz(motor) {
+  try { localStorage.setItem("willo_motor_voz", motor); } catch { /* sin almacenamiento */ }
+  pintarAvisoPruebas();
+}
+// En modo pruebas siempre se ve la opción, para poder volver a ElevenLabs.
+function modoDev() {
+  try { return localStorage.getItem("willo_dev") === "1" || motorVoz() === "pruebas"; } catch { return false; }
+}
+// Etiqueta arriba a la izquierda: que nadie presente a un banco con la voz de pruebas sin darse cuenta.
+function pintarAvisoPruebas() { $("aviso-pruebas").hidden = motorVoz() !== "pruebas"; }
+pintarAvisoPruebas();
+
+// Lo necesario para abrir una conversación con Noa con el motor elegido. Si no se puede, lanza un error
+// y la pantalla sigue como sin voz (la frase del guion o la voz del navegador).
+async function conectarNoa() {
+  if (motorVoz() === "pruebas") {
+    const e = await fetch("/api/noa-pruebas/estado").then(r => r.json()).catch(() => ({motivo: "el backend no responde"}));
+    if (!e.listo) throw new Error(`Noa de pruebas: ${e.motivo}`);
+    if (!ConversacionDePruebas.puedeOir()) throw new Error("Noa de pruebas: este navegador no reconoce la voz. Usa Chrome o Safari.");
+    return {Conversation: ConversacionDePruebas, extra: {}, voces: null};
+  }
+  const r = await fetch("/api/voz/signed-url");
+  if (!r.ok) throw new Error("voz no configurada");
+  const { signed_url, voces } = await r.json();
+  // Pide permiso del micro y lo suelta enseguida: dejarlo abierto puede dar problemas
+  // en Android (el SDK de ElevenLabs abre el suyo).
+  (await navigator.mediaDevices.getUserMedia({audio: true})).getTracks().forEach(t => t.stop());
+  // Versión fija: la que había cuando se probó la demo (9-11-2026). Una nueva puede cambiar la API.
+  const { Conversation } = await import("https://cdn.jsdelivr.net/npm/@elevenlabs/client@1.35.0/+esm");
+  return {Conversation, extra: {signedUrl: signed_url}, voces};
+}
+
+// Conversación de pruebas. Se usa igual que la de ElevenLabs (startSession, endSession, setMicMuted,
+// sendUserMessage, sendContextualUpdate, y los mismos avisos onMessage, onModeChange y onDisconnect),
+// así el resto de la pantalla no cambia. Las herramientas de cliente son las mismas funciones;
+// las webhook se llaman en este mismo backend.
+class ConversacionDePruebas {
+  static puedeOir() {
+    return !!(window.SpeechRecognition || window.webkitSpeechRecognition) && "speechSynthesis" in window;
+  }
+  static async startSession(opciones) {
+    const c = new ConversacionDePruebas(opciones);
+    c.empezar();
+    return c;
+  }
+  constructor(o) {
+    this.o = o;
+    this.nombre = o.dynamicVariables?.nombre || "Javi";
+    this.velocidad = o.overrides?.tts?.speed || 1;
+    this.historial = [];
+    this.cadena = Promise.resolve();   // un turno detrás de otro, en orden
+    this.cerrada = this.muda = this.escuchando = false;
+    this.modo = null;
+    const Oido = window.SpeechRecognition || window.webkitSpeechRecognition;
+    this.oido = new Oido();
+    this.oido.lang = "es-ES";
+    this.oido.interimResults = false;
+    this.oido.continuous = false;
+    this.oido.onresult = e => {
+      const texto = [...e.results].map(r => r[0].transcript).join(" ").trim();
+      if (!texto || this.cerrada) return;
+      this.ponerModo("speaking");   // mientras piensa no escucha
+      this.o.onMessage?.({source: "user", message: texto});
+      this.turno({rol: "persona", texto});
+    };
+    // El reconocimiento se para solo tras cada frase o silencio: si toca escuchar, vuelve a empezar.
+    this.oido.onend = () => { this.escuchando = false; setTimeout(() => this.escuchar(), 250); };
+    this.oido.onerror = e => {
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        console.warn("Noa de pruebas: sin permiso para el micro");
+        this.endSession();
+      }
+    };
+  }
+  empezar() {
+    // El mismo saludo que el agente de ElevenLabs, salvo que la pantalla lo quite (documentos).
+    const saludo = this.o.overrides?.agent?.firstMessage ?? `Hola, ${this.nombre}. Soy Noa. ¿Qué quieres saber de tu dinero?`;
+    if (!saludo) return this.ponerModo("listening");
+    this.historial.push({rol: "noa", texto: saludo});
+    this.o.onMessage?.({source: "ai", message: saludo});
+    this.ponerModo("speaking");
+    this.hablar(saludo).then(() => this.ponerModo("listening"));
+  }
+  ponerModo(modo) {
+    if (this.cerrada) return;
+    if (modo !== "listening") this.pararOido();
+    if (this.modo !== modo) { this.modo = modo; this.o.onModeChange?.({mode: modo}); }
+    if (modo === "listening") this.escuchar();
+  }
+  escuchar() {
+    if (this.cerrada || this.muda || this.escuchando || this.modo !== "listening") return;
+    try { this.oido.start(); this.escuchando = true; } catch { /* ya estaba escuchando */ }
+  }
+  pararOido() {
+    if (this.escuchando) { try { this.oido.abort(); } catch { /* ya parado */ } }
+    this.escuchando = false;
+  }
+  hablar(texto) {
+    return new Promise(listo => {
+      if (this.cerrada || !texto) return listo();
+      const u = new SpeechSynthesisUtterance(texto);
+      u.lang = "es-ES";
+      u.rate = 0.9 * this.velocidad;
+      u.onend = u.onerror = () => listo();
+      this.frase = u;   // si no se guarda, Chrome a veces no avisa de que ha terminado
+      speechSynthesis.speak(u);
+    });
+  }
+  // Pone un paso en la conversación y le pide a Noa que conteste (después del turno anterior).
+  turno(paso) {
+    this.cadena = this.cadena.then(() => { this.historial.push(paso); return this.pensar(); }).catch(e => console.warn(e));
+  }
+  async pensar() {
+    if (this.cerrada) return;
+    this.ponerModo("speaking");
+    try {
+      for (let vuelta = 0; vuelta < 6 && !this.cerrada; vuelta++) {
+        const r = await fetch("/api/noa-pruebas/turno", {method: "POST", headers: {"Content-Type": "application/json"},
+                                                         body: JSON.stringify({nombre: this.nombre, historial: this.historial})});
+        const d = await r.json().catch(() => ({}));
+        if (this.cerrada) return;
+        if (!r.ok) {
+          console.warn("Noa de pruebas:", r.status, d.detail);
+          await this.hablar(r.status === 429 ? "Se ha acabado la cuota gratis de Gemini. Espera un poco."
+                                             : "No he podido pensar la respuesta. Prueba otra vez.");
+          break;
+        }
+        this.historial.push({rol: "modelo", partes: d.partes || []});
+        if (d.texto) {
+          this.o.onMessage?.({source: "ai", message: d.texto});
+          await this.hablar(d.texto);
+        }
+        if (!d.llamadas?.length) break;
+        for (const ll of d.llamadas) {
+          this.historial.push({rol: "resultado", nombre: ll.nombre, id: ll.id, resultado: await this.usarHerramienta(ll)});
+        }
+      }
+    } finally {
+      this.ponerModo("listening");
+    }
+  }
+  async usarHerramienta({nombre, args, webhook}) {
+    try {
+      const deCliente = this.o.clientTools?.[nombre];
+      if (deCliente) return (await deCliente(args || {})) ?? "Hecho.";
+      if (webhook) {
+        const r = await fetch(webhook.ruta, {method: webhook.metodo,
+          ...(webhook.cuerpo ? {headers: {"Content-Type": "application/json"}, body: JSON.stringify(webhook.cuerpo)} : {})});
+        return await r.text();
+      }
+      return `La herramienta ${nombre} no está en esta pantalla.`;
+    } catch (e) {
+      return `Error en la herramienta ${nombre}: ${e?.message || e}`;
+    }
+  }
+  // Lo mismo que la conversación de ElevenLabs
+  sendUserMessage(texto) { this.turno({rol: "persona", texto}); }
+  sendContextualUpdate(texto) {
+    this.cadena = this.cadena.then(() => { this.historial.push({rol: "contexto", texto}); });
+  }
+  setMicMuted(muda) { this.muda = muda; muda ? this.pararOido() : this.escuchar(); }
+  async endSession() {
+    if (this.cerrada) return;
+    this.cerrada = true;
+    this.pararOido();
+    speechSynthesis.cancel();
+    this.o.onDisconnect?.();
+  }
+}
+
 // ---------- 2 · Hablando con Noa ----------
 // La voz es el agente Noa de ElevenLabs (su transcripción es Scribe). Noa explica; aquí no se paga nada.
 // Con lo que Javi dice, la pantalla saca el importe y el concepto y pide las cuentas
@@ -690,17 +894,11 @@ AL_ENTRAR["2"] = async () => {
   pintarMicro();
   $("p2-micro").classList.add("activo");
   try {
-    const r = await fetch("/api/voz/signed-url");
-    if (!r.ok) throw new Error("voz no configurada");
-    const { signed_url, voces } = await r.json();
-    // Pide permiso del micro y lo suelta enseguida: dejarlo abierto puede dar problemas
-    // en Android (el SDK de ElevenLabs abre el suyo).
-    (await navigator.mediaDevices.getUserMedia({audio: true})).getTracks().forEach(t => t.stop());
-    // Versión fija: la que había cuando se probó la demo (9-11-2026). Una nueva puede cambiar la API.
-    const { Conversation } = await import("https://cdn.jsdelivr.net/npm/@elevenlabs/client@1.35.0/+esm");
+    // ElevenLabs o el motor de pruebas, según Ajustes (ver conectarNoa)
+    const { Conversation, extra, voces } = await conectarNoa();
     let nueva = null;
     nueva = await abrirConversacion(Conversation, {
-      signedUrl: signed_url,
+      ...extra,
       // El prompt de Noa usa {{nombre}}: sin este valor, la conversación puede no arrancar.
       dynamicVariables: {nombre: "Javi"},
       // Herramienta de Noa que corre en esta pantalla: así Noa y la pantalla usan
@@ -903,6 +1101,7 @@ function decirConNavegador(texto) {
 async function decir(texto) {
   callar();
   if (!texto) return;
+  if (motorVoz() === "pruebas") return decirConNavegador(texto);   // pruebas: no se gasta nada de ElevenLabs
   try {
     const r = await fetch("/api/voz/decir", {method: "POST", headers: {"Content-Type": "application/json"},
                                              body: JSON.stringify({texto, voz: preferenciasVoz().voz,
@@ -1139,16 +1338,11 @@ async function noaDice(textoParaNoa) {
   await pararVoz();
   const miSesion = sesionVoz;
   try {
-    const r = await fetch("/api/voz/signed-url");
-    if (!r.ok) return false;
-    const { signed_url, voces } = await r.json();
-    // Pide permiso del micro y lo suelta enseguida: dejarlo abierto puede dar problemas
-    // en Android (el SDK de ElevenLabs abre el suyo).
-    (await navigator.mediaDevices.getUserMedia({audio: true})).getTracks().forEach(t => t.stop());
-    const { Conversation } = await import("https://cdn.jsdelivr.net/npm/@elevenlabs/client@1.35.0/+esm");
+    // ElevenLabs o el motor de pruebas, según Ajustes. Si no hay voz, lanza un error y se devuelve false.
+    const { Conversation, extra, voces } = await conectarNoa();
     let nueva = null;
     nueva = await abrirConversacion(Conversation, {
-      signedUrl: signed_url,
+      ...extra,
       dynamicVariables: {nombre: "Javi"},
       overrides: {agent: {firstMessage: ""}},   // sin "Hola, soy Noa": va directa al documento
       clientTools: {
@@ -1519,6 +1713,21 @@ AL_ENTRAR["14"] = () => {
   document.querySelectorAll("[data-ritmo]").forEach(b => b.onclick = () => { p.ritmo = b.dataset.ritmo; guardarPreferenciasVoz(p); pintar(); });
   $("p14-probar").onclick = () => decir("Hola. Soy Noa. Así suena mi voz a esta velocidad.");
   pintar();
+  // Motor de Noa: solo para el equipo
+  $("p14-motor").hidden = !modoDev();
+  const pintarMotor = () => {
+    const m = motorVoz();
+    document.querySelectorAll("[data-motor]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.motor === m)));
+    $("p14-motor-nota").textContent = m === "pruebas"
+      ? "Oye y habla el navegador y piensa Gemini. No gasta créditos de ElevenLabs. Necesita GEMINI_API_KEY en el .env."
+      : "Noa de verdad. Gasta créditos de ElevenLabs al hablar con ella y cuando las pantallas leen en voz alta.";
+  };
+  document.querySelectorAll("[data-motor]").forEach(b => b.onclick = async () => {
+    await pararVoz();   // nada abierto con el motor anterior
+    ponerMotorVoz(b.dataset.motor);
+    pintarMotor();
+  });
+  pintarMotor();
 };
 
 AL_ENTRAR["13"] = () => {

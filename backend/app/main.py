@@ -11,7 +11,7 @@ import re
 import unicodedata
 from datetime import date, datetime
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import httpx
 from fastapi.concurrency import run_in_threadpool
@@ -22,7 +22,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Resp
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import budget, documents, easyread, expenses, limites, notify, purchases, report, risk, support
+from . import budget, documents, easyread, expenses, limites, noa_pruebas, notify, purchases, report, risk, support
 from .limites import LIMITE_APP
 from .notify import avisar
 from .store import hoy, store
@@ -201,6 +201,21 @@ class SeleccionConfianza(BaseModel):
 
 class Texto(BaseModel):
     texto: str
+
+
+class PasoConversacion(BaseModel):
+    """Un paso de la conversación con Noa de pruebas (ver noa_pruebas.contenidos)."""
+    rol: Literal["persona", "noa", "contexto", "modelo", "resultado"]
+    texto: str | None = Field(default=None, max_length=4000)
+    partes: list[dict] | None = None
+    nombre: str | None = Field(default=None, max_length=80)
+    resultado: Any = None
+    id: str | None = Field(default=None, max_length=200)
+
+
+class TurnoNoa(BaseModel):
+    nombre: str = Field(default="Javi", max_length=40)
+    historial: list[PasoConversacion] = Field(default_factory=list, max_length=300)
 
 
 class TextoConVoz(Texto):
@@ -820,6 +835,27 @@ async def decir_con_voz_de_noa(t: TextoConVoz):
     if r.status_code >= 400:
         raise HTTPException(502, f"ElevenLabs respondió {r.status_code}")
     return Response(r.content, media_type="audio/mpeg")
+
+
+# ---------- Noa de pruebas (gratis) ----------
+# Para el equipo: oye y habla el navegador y piensa Gemini (plan gratis), con el mismo prompt y las
+# mismas herramientas que el agente de ElevenLabs. No toca nada de ElevenLabs. Ver noa_pruebas.py.
+
+@app.get("/api/noa-pruebas/estado")
+def estado_noa_pruebas():
+    return noa_pruebas.estado()
+
+
+@app.post("/api/noa-pruebas/turno")
+async def turno_noa_pruebas(t: TurnoNoa):
+    try:
+        return await noa_pruebas.pensar(t.nombre, [paso.model_dump(exclude_none=True) for paso in t.historial])
+    except noa_pruebas.SinConfigurar as e:
+        raise HTTPException(503, str(e))
+    except noa_pruebas.CuotaAgotada as e:
+        raise HTTPException(429, str(e))
+    except noa_pruebas.FalloGemini as e:
+        raise HTTPException(502, str(e))
 
 
 @app.post("/api/demo/reset")
